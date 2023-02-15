@@ -28,66 +28,75 @@ jobs:  ## Defines the list of jobs to run in this workflow.
       - name: Reformat Code ## Runs a code reformatting process and outputs a message indicating that the reformatting is completed.
         run: echo "Reformat code completed"
 
-  build-and-push-ecr-image:
-    name: Continuous Delivery
-    needs: integration
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  build-and-push-ecr-image: ## Defines the second job named "build-and-push-ecr-image".
+    name: Continuous Delivery ## Sets the name of the second job to "Continuous Delivery".
+    needs: integration  ##  Specifies that this job depends on the completion of the "integration" job.
+    runs-on: ubuntu-latest ##  Sets the operating system for the job to Ubuntu.
+    steps:      ## Defines a list of steps to run in the job.
+      - name: Checkout Code ##  Checks out the code from the repository
+        uses: actions/checkout@v3 
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Configure AWS credentials ## Configures AWS credentials using the AWS Actions configure-aws-credentials action.
+        uses: aws-actions/configure-aws-credentials@v1 #The uses keyword specifies the action to be used and the version number (@v1) indicates the version of the action to use.
+        with:  ## The with keyword specifies the parameters to be used for the action.
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }} ## put AWS_ACCESS_KEY_ID from github secrets variables
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} ## put the AWS_SECRET_ACCESS_KEY github secrets variables
+          aws-region: ${{ secrets.AWS_REGION }} ## set the AWS_REGION
 
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - name: Login to Amazon ECR ## Logs in to the Amazon ECR registry using the aws-actions/amazon-ecr-login action.
+        id: login-ecr 
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: DataCollection
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+      - name: Build, tag, and push image to Amazon ECR ##  Builds, tags, and pushes a Docker image to Amazon ECR.
+        id: build-image ## A unique identifier for this step of the workflow.
+        env: ## An environment variable block, containing three variables.
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}  ## The URL of the ECR registry where the Docker image will be stored. The value of this variable is obtained from the output of a previous step in the workflow (steps.login-ecr.outputs.registry)
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }} ## The name of the ECR repository where the Docker image will be stored. The value of this variable is stored as a secret in the GitHub repository (secrets.ECR_REPOSITORY_NAME).
+          IMAGE_TAG: DataCollection ##  The tag that will be applied to the Docker image. In this case, it is set to "DataCollection".
+        run: | ## The command block to run. In this case, it consists of two Docker commands and a GitHub action command.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . 
+  
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-  pull-and-start-app-on-prod:
-    needs: build-and-push-ecr-image
-    name: Continuous Deployment
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
+##docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .Builds a Docker image from the Dockerfile in the current directory (.) and tags it with the specified ECR registry, repository, and tag.       
+#docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG-Pushes the Docker image to the ECR repository specified by ECR_REGISTRY and ECR_REPOSITORY, with the tag specified by IMAGE_TAG.
+# echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG":- Sets the output of this step to the URL of the Docker image that was just built and pushed to ECR. 
+#The output variable is named image and its value is ECR_REGISTRY/ECR_REPOSITORY:IMAGE_TAG. 
+#This output can be used by subsequent steps in the workflow.
+
+  pull-and-start-app-on-prod: # Defines the third job named "pull-and-start-app-on-prod".
+    needs: build-and-push-ecr-image ## Specifies that this job depends on the completion of the "build-and-push-ecr-image" job.
+    name: Continuous Deployment #  Sets the name of the third job to "Continuous Deployment".
+    runs-on: self-hosted # Specifies that the job should run on a self-hosted machine.
+    steps: # Defines a list of steps to run in the job.
+      - name: Checkout ## Checks out the code from the repository.
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Configure AWS credentials ## Configures AWS credentials using the AWS Actions configure-aws-credentials action.
+        uses: aws-actions/configure-aws-credentials@v1 #The uses keyword specifies the action to be used and the version number (@v1) indicates the version of the action to use.
+        with: #The with keyword specifies the parameters to be used for the action.
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  ### put AWS_ACCESS_KEY_ID from github secrets variables
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} ## put the AWS_SECRET_ACCESS_KEY github secrets variables 
+          aws-region: ${{ secrets.AWS_REGION }} ## set the AWS_REGION
 
-      - name: AWS ECR Login
+      - name: AWS ECR Login  #This step logs in to the AWS Elastic Container Registry (ECR) using the aws ecr get-login-password command to retrieve a login token, and then uses docker login to authenticate with the ECR repository.
         run: sudo docker login -u AWS -p $(aws ecr get-login-password --region ${{ secrets.AWS_REGION }}) ${{ secrets.AWS_ECR_LOGIN_URI }}
 
-      - name: Pull App Image
+      - name: Pull App Image # This step pulls the Docker image for the app from the ECR repository, using the repository name and the image tag DataCollection.
         run: sudo docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:DataCollection
 
-      - name: Remove Already Running Container
+      - name: Remove Already Running Container #  This step uses docker ps to list running containers and grep to check if a container named "data-collection" is running. If it is running, it stops and removes the container. If it's not running, the command returns a success status without doing anything.
         run: docker ps -q --filter "name=data-collection" | grep -q . && docker stop ${IMAGE_NAME} && docker rm -fv ${IMAGE_NAME} || true
 
-      - name: Docker System Prune to Remove Old Images
+      - name: Docker System Prune to Remove Old Images ## This step removes any unused Docker images from the local Docker system using docker system prune -f.
         run: docker system prune -f
 
-      - name: Run Docker Image to serve users
-        run: |
-          docker run --name=data-collection -d \
+      - name: Run Docker Image to serve users # This step runs the Docker image as a new container using docker run.
+        run: | ## It passes environment variables and sets port forwarding to allow the app to run with the required configurations.# It also names the container "data-collection" using the --name option and runs it in the background with the -d option.
+
+          docker run --name=data-collection -d \ 
           -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
           -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
           -e AWS_BUCKET_HEADER_URL=${{ secrets.AWS_BUCKET_HEADER_URL }} \
