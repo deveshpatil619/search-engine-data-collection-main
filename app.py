@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from typing import List, Union, Any
 import uvicorn
 
+## this is an api connection code to run the endpoints
 
 app = FastAPI(title="DataCollection-Server")
 mongo = MongodbClient()
