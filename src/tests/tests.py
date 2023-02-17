@@ -40,3 +40,8 @@ def test_bulk_upload(label, data):
 # Write your test case here
 if __name__ == "__main__":
     test_fetch_api()
+
+
+
+
+    
