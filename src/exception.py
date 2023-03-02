@@ -33,10 +33,10 @@ class CustomException(Exception): ##This is the main custom exception class call
         super().__init__(error_message) ##The __init__() method takes an error message and error detail as input,
 #calls the superclass __init__() method with the error message,
         self.error_message = error_message_detail( ## calls the error_message_detail() helper function to format 
-#the error message and store it in the error_message attribute of the object. The __str__() method returns the 
-# formatted error message when the object is printed.
+#the error message and store it in the error_message attribute of the object. 
             error_message, error_detail=error_detail
         )
 
-    def __str__(self):
+    def __str__(self):#The __str__() method returns the 
+# formatted error message when the object is printed.
         return self.error_message
