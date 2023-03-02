@@ -53,10 +53,11 @@ class S3Connection: ## S3Connection is a class that provides methods to interact
         :return: json Response of state message (success or failure)
         """
         try:
-            self.bucket.upload_fileobj(
-                image_path,
-                f"images/{label}/{image_unique_name()}.jpeg",
-                ExtraArgs={"ACL": "public-read"},
+            self.bucket.upload_fileobj( ##It first tries to upload the file to the S3 bucket using the upload_fileobj method of the bucket object.
+                image_path, #is the path to the image file on the local filesystem, while the second parameter is the key under which the file should be stored in the S3 bucket.
+                f"images/{label}/{image_unique_name()}.jpeg", #image_unique_name() function is called to generate a unique name for the file, which is appended to the end of the key.
+                ExtraArgs={"ACL": "public-read"}, ## The ExtraArgs parameter specifies additional arguments to pass to the 
+#put_object method. In this case, it sets the ACL (access control list) to "public-read", which means that anyone can read the file once it's uploaded.
             )
             return {"Created": True}
         except Exception as e:
