@@ -16,11 +16,18 @@ class MetaDataStore: ## MetaDataStore is the class that provides the methods to 
     def register_labels(self): # This method is used to register the labels associated with the image data in the database.
         try:
             records = {} #This creates an empty dictionary to hold the label records.
-            for num, label in enumerate(self.labels): # This iterates over the labels attribute, 
-#assigning each label to the label variable and a unique number to the num variable.
+            for num, label in enumerate(self.labels): # This iterates over the labels attribute, assigning each label to the label variable and a unique number to the num variable.
                 records[f"{num}"] = label #  This adds the label to the records dictionary using the unique number as the key.
 
-            self.mongo.database['labels'].insert_one(records) ## This inserts the records dictionary into the labels collection of the MongoDB database.
+            existing_records = self.mongo.database['labels'].find_one({'label':label}) ## to check if the records already exists in the database and avoid the duplication
+            
+            if existing_records is None: ## if no duplicates found in database
+                self.mongo.database['labels'].insert_one(records) ## This inserts the records dictionary into the labels collection of the MongoDB database.
+
+            else:
+            # Duplicate records found, do not insert and print error message
+                print("Duplicate records found, skipping insertion.")
+        
 
         except Exception as e:
             message = CustomException(e, sys)
