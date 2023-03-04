@@ -19,24 +19,28 @@ def test_add_label(label): # takes a parameter label.
     print(res.content) #Print the content of the response returned by the API server
 
 
-def test_single_upload(data):
-    res = requests.post("http://localhost:8080/single_upload",
-                        headers={
-                            'Content-type': 'application/json'
+def test_single_upload(data):#This is a function definition for a test case called test_single_upload. It takes in one parameter called data.
+    res = requests.post("http://localhost:8080/single_upload", #  This line creates a POST request to the
+            # URL http://localhost:8080/single_upload. The response object is stored in the variable res.
+                        headers={ #
+                            'Content-type': 'application/json'# Set the "Content-type" header of the request 
+                            #to "application/json", indicating that the request body will be in JSON format.
                         },
-                        json={"label": "test1", "image": data.decode()},
+                        json={"label": "test1", "image": data.decode()}, #This line creates a JSON payload 
+#to be sent with the request. The payload includes a label key with the value "test1" and an image key with the value data.decode().
                         )
-    print(res.content)
+    print(res.content)#Print the content of the response returned by the API server
 
 
-def test_bulk_upload(label, data):
-    res = requests.post("http://localhost:8080/bulk_upload",
+def test_bulk_upload(label, data): ## This is defining a Python function called test_bulk_upload that takes two arguments: a label string and a data list of binary image data.
+    res = requests.post("http://localhost:8080/bulk_upload", # This is sending an HTTP POST request to the URL http://localhost:8080/bulk_upload.
                         headers={
-                            'Content-type': 'application/json'
+                            'Content-type': 'application/json' #This is specifying the headers for the HTTP request, which include the content type application/json.
                         },
-                        json={"label": label, "images": data},
+                        json={"label": label, "images": data}, #  This is specifying the JSON payload for the
+                    # HTTP request, which includes the label string and the data list of binary image data.
                         )
-    print(res.content)
+    print(res.content) #This is printing the content of the HTTP response, which is returned by the API endpoint at http://localhost:8080/bulk_upload.
 
 
 # Write your test case here
