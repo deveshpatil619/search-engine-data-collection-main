@@ -37,54 +37,72 @@ def fetch_label():   ##  function retrieves data from a MongoDB database and ass
         raise e
 
 
-# Label Post Api
-@app.post("/add_label/{label_name}")
+# code defines a POST endpoint /add_label/{label_name} that allows a user to add a new label to a collection
+#  of labels stored in a MongoDB database and in an S3 bucket.
+@app.post("/add_label/{label_name}") ##  line uses the @app.post decorator to associate the add_label function
+#with the /add_label/{label_name} endpoint. This endpoint expects a POST request with a URL parameter 
+# label_name, which is a string representing the name of the new label to be added.
 def add_label(label_name: str):
-    result = mongo.database['labels'].find()
-    documents = [document for document in result]
-    last_value = list(map(int, list(documents[0].keys())[1:]))[-1]
-    response = mongo.database['labels'].update_one({"_id": documents[0]["_id"]},
-                                                   {"$set": {str(last_value + 1): label_name}})
-    if response.modified_count == 1:
-        response = s3.add_label(label_name)
-        return {"Status": "Success", "S3-Response": response}
+    result = mongo.database['labels'].find() # line fetches all the documents from the MongoDB database 
+#collection 'labels' using the find method and assigns the resulting cursor object to result.
+    documents = [document for document in result] #list comprehension to iterate over the cursor object result and convert the documents to a list of dictionaries, documents.
+    last_value = list(map(int, list(documents[0].keys())[1:]))[-1] #This line gets the last key in the
+#dictionary stored in the first document in the documents list. This key represents the index of the last 
+# label in the collection. It does this by converting all the keys to integers, taking only the keys after 
+# the first key (which is the "_id" key), and then taking the last key in that list.
+    response = mongo.database['labels'].update_one({"_id": documents[0]["_id"]},{"$set": {str(last_value + 1): label_name}}) #This line updates 
+#the MongoDB document with the new label. It does this by calling the update_one method on the 'labels' 
+# collection with a filter to find the document with the same _id as the first document in documents, and 
+# a $set update operator to add a new key-value pair to the dictionary stored in that document. 
+# The key is str(last_value + 1) (i.e., the index of the new label), and the value is the label_name.
+    if response.modified_count == 1: #This line checks if the MongoDB update was successful by verifying that exactly one document was modified.
+        response = s3.add_label(label_name) #This line calls the add_label method of the s3 object to add the new label to the S3 bucket.
+        return {"Status": "Success", "S3-Response": response} #line returns a dictionary indicating that the new label was successfully added to both the MongoDB database and the S3 bucket.
     else:
-        return {"Status": "Fail", "Message": response[1]}
+        return {"Status": "Fail", "Message": response[1]}#This line returns a dictionary indicating that the update failed and includes the error message.
 
 
-@app.get("/single_upload/")
-def single_upload():
-    info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]}
-    return JSONResponse(content=info, status_code=200, media_type="application/json")
+@app.get("/single_upload/") #This is a decorator that registers a GET endpoint with the specified URL path "/single_upload/".
+def single_upload():# defines a function called single_upload that will handle the GET request.
+    info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]} #creates a dictionary object called
+#info with two keys and values. The "Response" key has the value "Available", and the "Post-Request-Body" key has a list of two strings, "label" and "Files".
+    return JSONResponse(content=info, status_code=200, media_type="application/json") #eturns a JSONResponse object 
+#with the content set to the info dictionary, a status code of 200, and a media type of "application/json". The response will contain the info dictionary as a JSON object.
 
 
 # Image Single Upload Api
-@app.post("/single_upload/")
-async def single_upload(label: str, file: UploadFile = None):
-    label = choices.get(label, False)
-    if file.content_type == "image/jpeg" and label != False:
-        response = s3.upload_to_s3(file.file, label)
-        return {"filename": file.filename, "label": label, "S3-Response": response}
+@app.post("/single_upload/") ##decorator that registers a POST endpoint with the specified URL path "/single_upload/".
+async def single_upload(label: str, file: UploadFile = None): #defines an asynchronous function called single_upload that takes two parameters: label as a string and file as an optional UploadFile object.
+    label = choices.get(label, False) #retrieves the label for the given label parameter from the global choices dictionary, or sets label to False if the label is not found.
+    if file.content_type == "image/jpeg" and label != False: #checks if the content_type of the uploaded file is "image/jpeg" and if a label was found for the given label parameter.
+        response = s3.upload_to_s3(file.file, label) #uploads the file to Amazon S3 using the upload_to_s3 method of the s3 object, passing in the file object and the label as arguments.
+        return {"filename": file.filename, "label": label, "S3-Response": response}# returns a dictionary containing the filename of the uploaded file, the label, and the response from the S3 upload.
     else:
         return {
-            "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
-            "LabelFound": label,
-        }
+            "ContentType": f"Content type should be Image/jpeg not {file.content_type}", # returns a dictionary 
+            "LabelFound": label,# with an error message indicating that the content type of the uploaded file should be "image/jpeg",
+        }        # and the label found (or False if no label was found) for the given label parameter.
 
 
-@app.get("/bulk_upload")
-def bulk_upload():
-    info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]}
-    return JSONResponse(content=info, status_code=200, media_type="application/json")
+@app.get("/bulk_upload")# decorator that registers a GET endpoint with the specified URL path "/bulk_upload".
+def bulk_upload(): #
+    info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]} #creates a dictionary called info with
+#two keys: "Response" and "Post-Request-Body". The value of "Response" is "Available", and the value of "Post-Request-Body" is a list containing the strings "label" and "Files".
+    return JSONResponse(content=info, status_code=200, media_type="application/json") ##eturns a JSONResponse object 
+#with the content set to the info dictionary, a status code of 200, and a media type of "application/json". The response will contain the info dictionary as a JSON object.
+
 
 
 # Transforms here
-@app.post("/bulk_upload")
-def bulk_upload(label: str, files: List[UploadFile] = File(...)):
+@app.post("/bulk_upload") ####decorator that registers a POST endpoint with the specified URL path "/bulk_upload".
+def bulk_upload(label: str, files: List[UploadFile] = File(...)): #defines the bulk_upload function, which takes in 
+#two parameters: label and files. The label parameter is a string that represents the label to apply to the uploaded
+# files. The files parameter is a list of UploadFile objects, which represent the files to upload.
     try:
-        skipped = []
-        final_response = None
-        label: Union[bool, Any] = choices.get(label, False)
+        skipped = [] ## creating empty list skipped that will store any files that were skipped during the upload process
+        final_response = None #final_response is None for now but will later store the final response from the S3 upload.
+        label: Union[bool, Any] = choices.get(label, False) #retrieves the label from the choices dictionary using 
+#the get method. If the label is found, it is stored in the label variable. If the label is not found, False is stored in label.
         if label:
             for file in files:
                 if file.content_type == "image/jpeg":
