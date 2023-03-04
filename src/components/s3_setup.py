@@ -70,4 +70,4 @@ class DataStore: ## this datastore class that contains methods to prepare and sy
 
 if __name__ == "__main__":
     store = DataStore() ##creates an instance of the DataStore class and calls the run_step() method on it. 
-    store.run_step()#This initiates the preparation and syncing of the image data.
+    store.run_step() #This initiates the preparation and syncing of the image data.

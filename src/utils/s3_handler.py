@@ -42,7 +42,8 @@ class S3Connection: ## S3Connection is a class that provides methods to interact
             return {"Created": True, "Path": response.key} ## response.key returns the path of the new folder.
         except Exception as e:
             message = CustomException(e, sys) ##If an exception occurs, CustomException is used to format the error message and return it in a dictionary format.
-            return {"Created": False, "Reason": message.error_message}
+            return {"Created": False, "Reason": message.error_message} ##  This returns a dictionary with a 
+        #Created key set to False and a Reason key set to the error message.
 
     def upload_to_s3(self, image_path, label: str):
         """
@@ -62,4 +63,5 @@ class S3Connection: ## S3Connection is a class that provides methods to interact
             return {"Created": True}
         except Exception as e:
             message = CustomException(e, sys)
-            return {"Created": False, "Reason": message.error_message}
+            return {"Created": False, "Reason": message.error_message} ##  This returns a dictionary with a 
+        #Created key set to False and a Reason key set to the error message.
