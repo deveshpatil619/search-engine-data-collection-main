@@ -103,18 +103,19 @@ def bulk_upload(label: str, files: List[UploadFile] = File(...)): #defines the b
         final_response = None #final_response is None for now but will later store the final response from the S3 upload.
         label: Union[bool, Any] = choices.get(label, False) #retrieves the label from the choices dictionary using 
 #the get method. If the label is found, it is stored in the label variable. If the label is not found, False is stored in label.
-        if label:
-            for file in files:
-                if file.content_type == "image/jpeg":
-                    response = s3.upload_to_s3(file.file, label)
-                    final_response = response
+        if label: #checks if label is truthy. If it is, the code inside the if block is executed. If it is not, the code inside the else block is executed.
+            for file in files: # loop that iterates over each file in the files list.
+                if file.content_type == "image/jpeg": # if the content type of the current file is "image/jpeg". If it is, the code inside the if block is executed. If it is not, the code inside the else block is executed.
+                    response = s3.upload_to_s3(file.file, label)#uploads the file to Amazon S3 using the upload_to_s3 method of the s3 object, passing in the file object and the label as arguments.
+                    final_response = response #. The response from the upload is stored in the response variable, and then copied to the final_response variable.
                 else:
-                    skipped.append(file.filename)
-            return {
-                "label": label,
-                "skipped": skipped,
-                "S3-Response": final_response,
-                "LabelFound": label,
+                    skipped.append(file.filename) ##adds the filename of the current file to the skipped list because its content type is not "image/jpeg".
+            return { # returns a dictionary containing information about the upload process.
+                "label": label, # The label key contains the label that was applied to the uploaded files.
+                "skipped": skipped, # The skipped key contains a list of filenames that were skipped during the upload process.
+                "S3-Response": final_response, # The S3-Response key contains the final response from the S3 upload.
+                "LabelFound": label, #The LabelFound key contains the value of the label variable, which is either
+                 # the label that was found in the choices dictionary or False.
             }
         else:
             return {
@@ -124,8 +125,10 @@ def bulk_upload(label: str, files: List[UploadFile] = File(...)): #defines the b
                 "LabelFound": label,
             }
     except Exception as e:
-        return {"ContentType": f"Content type should be Image/jpeg not {e}"}
+        return {"ContentType": f"Content type should be Image/jpeg not {e}"} #The exception is assigned to the 
+    #variable e, and a JSON response is returned with the error message that includes the exception.
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8080) #the specified host and port (in this case, 0.0.0.0:8080).
+#This block ensures that the server is only started when the script is run directly, and not when it is imported as a module.
