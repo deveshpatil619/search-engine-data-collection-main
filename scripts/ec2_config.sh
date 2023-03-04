@@ -37,3 +37,11 @@ sudo ./svc.sh status
 ## To stop the service
 sudo ./svc.sh stop
 sudo ./svc.sh uninstall
+
+
+
+
+
+
+
+
