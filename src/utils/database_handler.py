@@ -21,7 +21,7 @@ class MongodbClient:
         if MongodbClient.client is None: #The code checks if the client is already created or not. 
             MongodbClient.client = pymongo.MongoClient( ##If it's not created, it creates a new 
 #pymongo.MongoClient object by passing the MongoDB Atlas cluster URL, username, and password as arguments.
-                "mongodb://{}:{}@cluster0.s8lbkcs.mongodb.net/?retryWrites=true&w=majority".format(username,password)
+                "mongodb+srv://devesh:Root@cluster0.s8lbkcs.mongodb.net/?retryWrites=true&w=majority"
             )
         self.client = MongodbClient.client ##The code sets the client and database properties 
         self.database = self.client[database_name] ## of the class to the client object and the 
