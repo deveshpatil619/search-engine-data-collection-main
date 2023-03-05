@@ -19,7 +19,7 @@ class MetaDataStore: ## MetaDataStore is the class that provides the methods to 
             for num, label in enumerate(self.labels): # This iterates over the labels attribute, assigning each label to the label variable and a unique number to the num variable.
                 records[f"{num}"] = label #  This adds the label to the records dictionary using the unique number as the key.
 
-            existing_records = self.mongo.database['labels'].find_one({'label':label}) ## to check if the records already exists in the database and avoid the duplication
+            existing_records = self.mongo.database['labels'].find_one(records) ## to check if the records already exists in the database and avoid the duplication
             
             if existing_records is None: ## if no duplicates found in database
                 self.mongo.database['labels'].insert_one(records) ## This inserts the records dictionary into the labels collection of the MongoDB database.
