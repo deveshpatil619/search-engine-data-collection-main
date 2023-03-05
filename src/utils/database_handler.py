@@ -28,7 +28,7 @@ class MongodbClient:
         self.database_name = database_name ##database_name passed to the initializer, respectively.
 
      
-        collection = self.database["my_collection"] ##The code creates a new collection object by specifying the collection name my_collection
+        collection = self.database[database_name] ##The code creates a new collection object by specifying the collection name my_collection
         print(collection.count_documents({})) # Count the number of documents in the collection
 
 
