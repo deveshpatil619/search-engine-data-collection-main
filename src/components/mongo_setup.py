@@ -3,12 +3,12 @@ import os
 import sys
 from src.utils.database_handler import MongodbClient  ## importing the MongodbClient class 
 from src.exception import CustomException   ## importing the CustomException class
-
+from from_root import from_root ## to get the root girectory of working project
 
 class MetaDataStore: ## MetaDataStore is the class that provides the methods to store the metadata information about image-data
 
     def __init__(self):
-        self.root = os.path.join("F:\\Industry_ready_projects\\Reverse_Image_Search_Engine\\search-engine-data-collection-main", "data") ##  This sets the root attribute to the current working directory joined with a subdirectory named "data".
+        self.root = os.path.join(from_root(), "data") ##  This sets the root attribute to the current working directory joined with a subdirectory named "data".
         self.images = os.path.join(self.root, "caltech-101") ## This sets the images attribute to the root directory 'data' joined with a subdirectory named "caltech-101".
         self.labels = os.listdir(self.images) # This sets the labels attribute to the list of filenames in the images directory.
         self.mongo = MongodbClient() # This sets the mongo attribute to an instance of the MongodbClient class.
