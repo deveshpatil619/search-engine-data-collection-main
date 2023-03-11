@@ -23,11 +23,11 @@ class S3Connection: ## S3Connection is a class that provides methods to interact
         AWS secret access key set in the environment variables AWS_ACCESS_KEY_ID and 
         AWS_SECRET_ACCESS_KEY, respectively."""
         session = boto3.Session( 
-            aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
-            aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
         self.s3 = session.resource("s3") # creates an S3 resource object using the session object.
-        self.bucket = self.s3.Bucket(os.environ["AWS_BUCKET_NAME"]) # sets the bucket attribute of the class 
+        self.bucket = self.s3.Bucket(os.getenv("AWS_BUCKET_NAME")) # sets the bucket attribute of the class 
 # instance to the S3 bucket specified in the environment variable AWS_BUCKET_NAME
 
     def add_label(self, label: str) -> Dict:
