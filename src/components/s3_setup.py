@@ -4,13 +4,13 @@ import sys
 from zipfile import ZipFile # Class with methods to open, read, write, close, list zip files.
 import shutil #Utility functions for copying and archiving files and directory trees.
 from src.exception import CustomException   ## importing the custom exceptions
-
+from from_root import from_root  ## to get the root girectory of working project
 
 # https://www.kaggle.com/datasets/imbikramsaha/caltech-101 [ Get data from kaggle and put it into data folder ]
 
 class DataStore: ## this datastore class that contains methods to prepare and sync image data
     def __init__(self):
-        self.root = os.path.join(os.getcwd(), "data")##  This sets the root attribute to the current working directory joined with a subdirectory named "data".
+        self.root = os.path.join(os.from_root(), "data")##  This sets the root attribute to the current working directory joined with a subdirectory named "data".
         self.zip = os.path.join(self.root, "archive.zip") ## This sets the images attribute to the root directory 'data' joined with a subdirectory named "archive.zip".
         self.images = os.path.join(self.root, "caltech-101") ## This sets the images attribute to the root directory 'data' joined with a subdirectory named "caltech-101".
         self.list_unwanted = ["BACKGROUND_Google"]#self.list_unwanted is a list containing a single string element "BACKGROUND_Google"
